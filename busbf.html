@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bus Booking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f2f2f2;
+      color: #333;
+    }
+    header {
+      background: #ff9800;
+      color: #fff;
+      padding: 15px;
+      text-align: center;
+    }
+    .user-info {
+      padding: 20px;
+      background: #fff3e0;
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .user-info input {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      width: 220px;
+    }
+    .container {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+      flex-wrap: wrap;
+    }
+    .bus-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      width: 300px;
+      padding: 15px;
+      text-align: center;
+      margin: 10px;
+    }
+    .buses {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 15px 0;
+    }
+    .bus {
+      width: 70px;
+      height: 70px;
+      background: #1e88e5;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .bus.selected {
+      background: #f44336;
+    }
+    button {
+      padding: 10px 20px;
+      border: none;
+      background: #ff9800;
+      color: white;
+      cursor: pointer;
+      transition: 0.3s;
+      border-radius: 5px;
+    }
+    button:hover {
+      background: #f57c00;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Bus Booking</h1>
+  </header>
+
+  <div class="user-info">
+    <input type="text" id="name" placeholder="Full Name" required />
+    <input type="email" id="email" placeholder="Email Address" required />
+    <input type="tel" id="mobile" placeholder="Mobile Number" required />
+    <input type="text" id="from" placeholder="Departure (From)" required />
+    <input type="text" id="to" placeholder="Arrival (To)" required />
+  </div>
+
+  <div class="container">
+    <div class="bus-card">
+      <h2>Bus: Express</h2>
+      <p>Departure: 8:00 AM</p>
+      <p>Arrival: 12:00 PM</p>
+      <div class="buses" id="buses1"></div>
+      <button onclick="bookBuses('buses1')">Book</button>
+    </div>
+
+    <div class="bus-card">
+      <h2>Bus: Luxury</h2>
+      <p>Departure: 2:00 PM</p>
+      <p>Arrival: 6:00 PM</p>
+      <div class="buses" id="buses2"></div>
+      <button onclick="bookBuses('buses2')">Book</button>
+    </div>
+  </div>
+
+  <script>
+    function createBuses(id) {
+      const container = document.getElementById(id);
+      for (let i = 0; i < 12; i++) {
+        const bus = document.createElement('div');
+        bus.classList.add('bus');
+        bus.textContent = `Seat ${i + 1}`;
+        bus.onclick = () => bus.classList.toggle('selected');
+        container.appendChild(bus);
+      }
+    }
+
+    async function bookBuses(id) {
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const mobile = document.getElementById("mobile").value.trim();
+      const from = document.getElementById("from").value.trim();
+      const to = document.getElementById("to").value.trim();
+      const selected = document.querySelectorAll(`#${id} .bus.selected`);
+
+      if (!name || !email || !mobile || !from || !to) {
+        alert("Please fill in all fields.");
+        return;
+      }
+
+      if (selected.length === 0) {
+        alert("Please select at least one seat.");
+        return;
+      }
+
+      const seats = Array.from(selected).map(bus => bus.textContent);
+      const busType = id === 'buses1' ? 'Express' : 'Luxury';
+
+      const data = {
+        name,
+        email,
+        mobile,
+        from,
+        to,
+        seats,
+        busType
+      };
+
+      try {
+        const response = await fetch('http://localhost:3000/busbookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          alert("Booking submitted successfully!");
+          selected.forEach(bus => bus.classList.remove('selected'));
+        } else {
+          alert("Error submitting booking.");
+        }
+      } catch (error) {
+        alert("Could not connect to the server.");
+        console.error(error);
+      }
+    }
+
+    window.onload = () => {
+      createBuses("buses1");
+      createBuses("buses2");
+    };
+  </script>
+</body>
+</html>

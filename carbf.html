@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Car Booking</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f2f2f2; color: #333;
+    }
+    header {
+      background: #4caf50;
+      color: #fff; padding: 15px;
+      text-align: center;
+    }
+    .form-container {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      max-width: 400px;
+      margin: 20px auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-container input {
+      padding: 10px; margin: 10px 0;
+      border-radius: 4px; border: 1px solid #ccc;
+    }
+    .container {
+      display: flex;
+      justify-content: space-around;
+      padding: 20px;
+      flex-wrap: wrap;
+    }
+    .car-card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 300px;
+      padding: 15px;
+      text-align: center;
+      margin: 10px;
+    }
+    .cars {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      padding: 15px 0;
+    }
+    .car {
+      width: 70px; height: 70px;
+      background: #1e88e5;
+      color: white;
+      display: flex; justify-content: center;
+      align-items: center;
+      border-radius: 5px; cursor: pointer;
+    }
+    .car.selected {
+      background: #f44336;
+    }
+    button {
+      padding: 10px 20px;
+      border: none; background: #4caf50;
+      color: white; cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+    }
+    button:hover {
+      background: #388e3c;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Car Booking</h1>
+</header>
+
+<div class="form-container">
+  <input type="text" id="name" placeholder="Name" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="tel" id="mobile" placeholder="Mobile Number" required>
+  <input type="text" id="from" placeholder="From" required>
+  <input type="text" id="to" placeholder="To" required>
+</div>
+
+<div class="container">
+  <div class="car-card">
+    <h2>Car: Sedan</h2>
+    <p>Pickup: 10:00 AM</p>
+    <p>Drop-off: 2:00 PM</p>
+    <div class="cars" id="cars1"></div>
+    <button onclick="bookCars('cars1', 'Sedan')">Book</button>
+  </div>
+
+  <div class="car-card">
+    <h2>Car: SUV</h2>
+    <p>Pickup: 3:00 PM</p>
+    <p>Drop-off: 7:00 PM</p>
+    <div class="cars" id="cars2"></div>
+    <button onclick="bookCars('cars2', 'SUV')">Book</button>
+  </div>
+</div>
+
+<script>
+  function createCars(id) {
+    const container = document.getElementById(id);
+    for (let i = 0; i < 8; i++) {
+      const car = document.createElement('div');
+      car.classList.add('car');
+      car.textContent = `Car ${i + 1}`;
+      car.onclick = () => car.classList.toggle('selected');
+      container.appendChild(car);
+    }
+  }
+
+  async function bookCars(containerId, carType) {
+    const selected = document.querySelectorAll(`#${containerId} .car.selected`);
+    const seatNumbers = Array.from(selected).map(car => car.textContent);
+
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const mobile = document.getElementById("mobile").value;
+    const from = document.getElementById("from").value;
+    const to = document.getElementById("to").value;
+
+    if (!name || !email || !mobile || !from || !to) {
+      alert("Please fill all details.");
+      return;
+    }
+
+    if (seatNumbers.length === 0) {
+      alert("Please select at least one car.");
+      return;
+    }
+
+    const data = {
+      name,
+      email,
+      mobile,
+      from,
+      to,
+      carType,
+      seatNumbers
+    };
+
+    try {
+      const response = await fetch('http://localhost:3000/carbookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (response.ok) {
+        alert("Booking submitted successfully!");
+        selected.forEach(car => car.classList.remove('selected'));
+      } else {
+        alert("Error submitting booking.");
+      }
+    } catch (error) {
+      alert("Could not connect to the server.");
+      console.error(error);
+    }
+  }
+
+  window.onload = () => {
+    createCars('cars1');
+    createCars('cars2');
+  };
+</script>
+
+</body>
+</html>

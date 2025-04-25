@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login & Signup</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(to right, #ff7e5f, #feb47b, #86a8e7, #91eae4);
+      background-attachment: fixed;
+      color: #333;
+    }
+
+    .popup-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .login-wrapper, .signup-wrapper {
+      display: flex;
+      align-items: center;
+      background: #2d3e50;
+      border-radius: 20px;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+
+    .side-image {
+      object-fit: cover;
+      border-radius: 20px 0 0 20px;
+    }
+
+    .login-box, .signup-box {
+      background: #2d3e50;
+      padding: 40px;
+      text-align: center;
+      width: 350px;
+      position: relative;
+      border-radius: 0 20px 20px 0;
+    }
+
+    .login-box h2, .signup-box h2 {
+      margin-bottom: 20px;
+      color: #fff;
+      font-size: 28px;
+      font-weight: bold;
+      text-transform: uppercase;
+    }
+
+    .login-box input, .signup-box input {
+      width: 100%;
+      padding: 15px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 50px;
+      font-size: 16px;
+      background-color: #f5f5f5;
+    }
+
+    .login-box button, .signup-box button {
+      width: 100%;
+      padding: 15px;
+      background-color: #00aaff;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      font-size: 18px;
+    }
+
+    .login-box button:hover, .signup-box button:hover {
+      background-color: #0077cc;
+    }
+
+    .social-btns {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+
+    .social-btn {
+      width: 48%;
+      padding: 12px;
+      background-color: #fff;
+      color: #333;
+      border: 1px solid #ddd;
+      border-radius: 50px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .signup-btn {
+      width: 100%;
+      padding: 15px;
+      background-color: #FF5722;
+      color: white;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+
+    .signup-btn:hover {
+      background-color: #d84315;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 28px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .close-btn:hover {
+      color: #e74c3c;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login Popup -->
+<div class="popup-container" id="loginPopup">
+  <div class="login-wrapper">
+    <img src="booking.jpg" width="620px" height="550px" class="side-image">
+    <div class="login-box">
+      <span class="close-btn" onclick="closeLoginPopup()">&times;</span>
+      <h2>Login</h2>
+      <input type="text" id="loginUsername" placeholder="Enter Username" required>
+      <input type="password" id="loginPassword" placeholder="Enter Password" required>
+      <button onclick="handleLogin()">Login</button>
+
+      <div class="social-btns">
+        <button class="social-btn"><i class="fa fa-google"></i> Google</button>
+        <button class="social-btn"><i class="fa fa-envelope"></i> Mail</button>
+      </div>
+      <div class="social-btns">
+        <button class="social-btn"><i class="fa fa-linkedin"></i> LinkedIn</button>
+      </div>
+      <button class="signup-btn" onclick="openSignupPopup()">Sign Up</button>
+      <p id="loginMessage" style="color: white; margin-top: 10px;"></p>
+    </div>
+  </div>
+</div>
+
+<!-- Signup Popup -->
+<div class="popup-container" id="signupPopup" style="display: none;">
+  <div class="signup-wrapper">
+    <img src="login.jpg" width="300px" height="420px" class="side-image">
+    <div class="signup-box">
+      <span class="close-btn" onclick="closeSignupPopup()">&times;</span>
+      <h2>Sign Up</h2>
+      <input type="text" id="signupUsername" placeholder="Enter Username" required>
+      <input type="email" id="signupEmail" placeholder="Enter Email" required>
+      <input type="password" id="signupPassword" placeholder="Create Password" required>
+      <button onclick="handleSignup()">Submit</button>
+      <p id="signupMessage" style="color: white; margin-top: 10px;"></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  function openSignupPopup() {
+    document.getElementById("signupPopup").style.display = "flex";
+    document.getElementById("loginPopup").style.display = "none";
+  }
+
+  function closeSignupPopup() {
+    document.getElementById("signupPopup").style.display = "none";
+  }
+
+  function closeLoginPopup() {
+    document.getElementById("loginPopup").style.display = "none";
+  }
+
+  async function handleLogin() {
+    const username = document.getElementById("loginUsername").value;
+    const password = document.getElementById("loginPassword").value;
+
+    const response = await fetch("http://localhost:3000/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+
+    const message = document.getElementById("loginMessage");
+    if (response.ok) {
+      message.innerText = "Login successful!";
+      message.style.color = "lightgreen";
+      setTimeout(() => {
+      window.location.href = "index.html"; // Replace with your target page
+    }, 1000);
+    } else {
+      const errText = await response.text();
+      message.innerText = "Login failed: " + errText;
+      message.style.color = "red";
+    }
+  }
+
+  async function handleSignup() {
+    const username = document.getElementById("signupUsername").value;
+    const email = document.getElementById("signupEmail").value;
+    const password = document.getElementById("signupPassword").value;
+
+    const response = await fetch("http://localhost:3000/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, email, password })
+    });
+
+    const message = document.getElementById("signupMessage");
+    if (response.ok) {
+      message.innerText = "Registered successfully!";
+      message.style.color = "lightgreen";
+      setTimeout(() => {
+        closeSignupPopup();
+        document.getElementById("loginPopup").style.display = "flex";
+        document.getElementById("loginMessage").innerText = "Please login with your new account.";
+        document.getElementById("loginMessage").style.color = "lightblue";
+      }, 1000);
+    } else {
+      const errText = await response.text();
+      message.innerText = "Signup failed: " + errText;
+      message.style.color = "red";
+    }
+  }
+</script>
+
+</body>
+</html>

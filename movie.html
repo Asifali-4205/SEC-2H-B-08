@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Event Booking</title>
+  <style>
+    body { font-family: Arial; background: #f4f4f4; margin: 0; padding: 0; }
+    header { background: #ff5722; color: white; padding: 15px; text-align: center; }
+    .form-container {
+      max-width: 500px; margin: 20px auto; background: white;
+      padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .form-container input {
+      width: 100%; padding: 10px; margin: 10px 0;
+      border-radius: 5px; border: 1px solid #ccc;
+    }
+    .seats {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+    }
+    .seat {
+      width: 60px; height: 60px; background: #009688;
+      color: white; display: flex; justify-content: center;
+      align-items: center; cursor: pointer; border-radius: 6px;
+    }
+    .seat.selected { background: #e91e63; }
+    button {
+      margin-top: 15px; padding: 10px; background: #ff5722;
+      border: none; color: white; cursor: pointer; width: 100%;
+    }
+    button:hover { background: #e64a19; }
+  </style>
+</head>
+<body>
+
+<header><h1>Event Booking</h1></header>
+
+<div class="form-container">
+  <input type="text" id="name" placeholder="Name" required>
+  <input type="email" id="email" placeholder="Email" required>
+  <input type="tel" id="mobile" placeholder="Mobile" required>
+  <input type="text" id="from" placeholder="From" required>
+  <input type="text" id="to" placeholder="To" required>
+  <input type="text" id="event" placeholder="Event Name" required>
+
+  <div class="seats" id="seatContainer"></div>
+
+  <button onclick="submitBooking()">Book Now</button>
+</div>
+
+<script>
+  function createSeats() {
+    const container = document.getElementById("seatContainer");
+    for (let i = 1; i <= 20; i++) {
+      const seat = document.createElement("div");
+      seat.classList.add("seat");
+      seat.textContent = `S${i}`;
+      seat.onclick = () => seat.classList.toggle("selected");
+      container.appendChild(seat);
+    }
+  }
+
+  async function submitBooking() {
+    const name = document.getElementById("name").value;
+    const email = document.getElementById("email").value;
+    const mobile = document.getElementById("mobile").value;
+    const from = document.getElementById("from").value;
+    const to = document.getElementById("to").value;
+    const event = document.getElementById("event").value;
+    const selectedSeats = [...document.querySelectorAll(".seat.selected")].map(seat => seat.textContent);
+
+    if (!name || !email || !mobile || !from || !to || !event || selectedSeats.length === 0) {
+      return alert("Please fill all fields and select at least one seat.");
+    }
+
+    const bookingData = { name, email, mobile, from, to, event, seats: selectedSeats };
+
+    try {
+      const res = await fetch('http://localhost:3000/eventbookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      });
+
+      if (res.ok) {
+        alert("Booking successful!");
+        document.querySelectorAll(".seat.selected").forEach(seat => seat.classList.remove("selected"));
+      } else {
+        alert("Booking failed.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("Could not connect to the server.");
+    }
+  }
+
+  window.onload = createSeats;
+</script>
+
+</body>
+</html>

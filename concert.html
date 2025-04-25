@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Concert Booking</title>
+  <style>
+    body { font-family: Arial, sans-serif; background: #f2f2f2; margin: 0; padding: 0; color: #333; }
+    header { background: #673ab7; color: #fff; padding: 15px; text-align: center; }
+    .form { display: flex; justify-content: center; gap: 20px; padding: 20px; flex-wrap: wrap; background: #ede7f6; }
+    .form input { padding: 10px; border: 1px solid #ccc; border-radius: 5px; width: 220px; }
+    .container { display: flex; justify-content: space-around; padding: 20px; flex-wrap: wrap; }
+    .concert-card {
+      background: #fff; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      width: 300px; padding: 15px; text-align: center; margin: 10px;
+    }
+    .seats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px 0; }
+    .seat {
+      width: 60px; height: 60px; background: #1e88e5; color: white;
+      display: flex; justify-content: center; align-items: center;
+      border-radius: 5px; cursor: pointer;
+    }
+    .seat.selected { background: #f44336; }
+    button {
+      padding: 10px 20px; border: none; background: #673ab7;
+      color: white; cursor: pointer; border-radius: 5px;
+    }
+    button:hover { background: #512da8; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Concert Booking</h1>
+</header>
+
+<div class="form">
+  <input type="text" id="name" placeholder="Your Name" required />
+  <input type="email" id="email" placeholder="Email" required />
+  <input type="tel" id="mobile" placeholder="Mobile Number" required />
+</div>
+
+<div class="container">
+  <div class="concert-card">
+    <h2>Concert: Rock Night</h2>
+    <p>Time: 7:00 PM</p>
+    <p>Venue: Stadium A</p>
+    <div class="seats" id="seats1"></div>
+    <button onclick="bookSeats('seats1', 'Rock Night')">Book</button>
+  </div>
+  <div class="concert-card">
+    <h2>Concert: Jazz Fest</h2>
+    <p>Time: 9:00 PM</p>
+    <p>Venue: Arena B</p>
+    <div class="seats" id="seats2"></div>
+    <button onclick="bookSeats('seats2', 'Jazz Fest')">Book</button>
+  </div>
+</div>
+
+<script>
+  function createSeats(id) {
+    const container = document.getElementById(id);
+    for (let i = 1; i <= 16; i++) {
+      const seat = document.createElement('div');
+      seat.classList.add('seat');
+      seat.textContent = `S${i}`;
+      seat.onclick = () => seat.classList.toggle('selected');
+      container.appendChild(seat);
+    }
+  }
+
+  async function bookSeats(containerId, concertName) {
+    const name = document.getElementById("name").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const mobile = document.getElementById("mobile").value.trim();
+    const selected = document.querySelectorAll(`#${containerId} .seat.selected`);
+    const seatNumbers = Array.from(selected).map(seat => seat.textContent);
+
+    if (!name || !email || !mobile) {
+      alert("Please fill in all user details.");
+      return;
+    }
+
+    if (seatNumbers.length === 0) {
+      alert("Please select at least one seat.");
+      return;
+    }
+
+    const bookingData = {
+      name,
+      email,
+      mobile,
+      concert: concertName,
+      seats: seatNumbers
+    };
+
+    try {
+      const response = await fetch('http://localhost:3000/concertbookings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookingData)
+      });
+
+      if (response.ok) {
+        alert("Booking successful!");
+        selected.forEach(seat => seat.classList.remove('selected'));
+      } else {
+        alert("Booking failed!");
+      }
+    } catch (error) {
+      alert("Server error.");
+      console.error(error);
+    }
+  }
+
+  window.onload = () => {
+    createSeats('seats1');
+    createSeats('seats2');
+  };
+</script>
+
+</body>
+</html>
